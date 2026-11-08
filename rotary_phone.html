@@ -200,8 +200,22 @@
     let totalDelta = 0;
 
     let audioCtx = null;
+
+    function unlockAudio() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        if (!audioCtx) {
+            audioCtx = new AudioContextClass();
+        }
+
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(() => {});
+        }
+    }
+
     function playTick() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        unlockAudio();
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
         osc.frequency.setValueAtTime(140, audioCtx.currentTime);
@@ -262,6 +276,7 @@
     }
 
     function handleStart(e) {
+        unlockAudio();
         if (isReturning) return;
         const touchAngle = getAngle(e);
         activeHoleIdx = -1;
