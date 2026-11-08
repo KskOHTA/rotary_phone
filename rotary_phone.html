@@ -178,12 +178,28 @@
     <button onclick="resetDisplay()" class="mt-20 text-zinc-700 text-[10px] border border-zinc-900 px-6 py-2 rounded-full hover:bg-zinc-950 transition-all uppercase font-black tracking-widest">Reset</button>
 </div>
 
+<button id="sound-button" style="
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: #f5f5f5;
+    color: #111;
+    border: none;
+    border-radius: 9999px;
+    padding: 12px 20px;
+    font-weight: bold;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+">音を有効にする</button>
+
 <script>
     const diskGroup = document.getElementById('rotary-disk-group');
     const plate = document.getElementById('number-plate');
     const holesGroup = document.getElementById('holes-group');
     const rimsLayer = document.getElementById('rims-layer');
     const display = document.getElementById('display-window');
+    const soundButton = document.getElementById('sound-button');
 
     const CENTER_COORD = 160; 
     const HOLE_RADIUS = 112; 
@@ -202,11 +218,11 @@
     let audioCtx = null;
 
     function unlockAudio() {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
 
         if (!audioCtx) {
-            audioCtx = new AudioContextClass();
+            audioCtx = new Ctx();
         }
 
         if (audioCtx.state === 'suspended') {
@@ -215,15 +231,20 @@
     }
 
     function playTick() {
-        unlockAudio();
+        if (!audioCtx || audioCtx.state !== 'running') return;
+
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
+
         osc.frequency.setValueAtTime(140, audioCtx.currentTime);
         osc.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.04);
+
         g.gain.setValueAtTime(0.08, audioCtx.currentTime);
         g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.04);
+
         osc.connect(g);
         g.connect(audioCtx.destination);
+
         osc.start();
         osc.stop(audioCtx.currentTime + 0.04);
     }
@@ -278,6 +299,7 @@
     function handleStart(e) {
         unlockAudio();
         if (isReturning) return;
+
         const touchAngle = getAngle(e);
         activeHoleIdx = -1;
         for (let i = 0; i < 10; i++) {
@@ -303,6 +325,7 @@
         while (delta < -180) delta += 360;
         totalDelta += delta;
         lastMouseAngle = moveAngle;
+
         if (totalDelta > 0) {
             const holeStart = START_ANGLE + (activeHoleIdx * STEP);
             const maxRot = STOP_ANGLE - holeStart;
@@ -358,11 +381,16 @@
 
     function resetDisplay() { display.innerText = ""; }
 
+    soundButton.addEventListener('click', () => {
+        unlockAudio();
+        soundButton.style.display = 'none';
+    });
+
     diskGroup.addEventListener('mousedown', handleStart);
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleEnd);
-    diskGroup.addEventListener('touchstart', handleStart);
-    window.addEventListener('touchmove', handleMove);
+    diskGroup.addEventListener('touchstart', handleStart, { passive: false });
+    window.addEventListener('touchmove', handleMove, { passive: false });
     window.addEventListener('touchend', handleEnd);
 
     init();
