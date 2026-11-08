@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昭和レトロ 黒電話シミュレーター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Hiragino Kaku Gothic ProN', sans-serif;
+            touch-action: none;
+            overflow: hidden;
+        }
+        #phone-case {
+            position: relative;
+            width: 360px;
+            height: 620px;
+            background: linear-gradient(145deg, #1a1a1a, #000);
+            border-radius: 60px 60px 40px 40px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+        }
+        #display-window {
+            width: 85%;
+            height: 65px;
+            background: #000;
+            border: 2px solid #222;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 34px;
+            font-weight: bold;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,1);
+            letter-spacing: 3px;
+        }
+        .dial-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+        }
+        #number-plate {
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            background: #050505;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .number-label {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 900;
+            transform: translate(-50%, -50%);
+        }
+        #rotary-disk-group {
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.1s linear;
+        }
+        #stopper {
+            position: absolute;
+            width: 14px;
+            height: 52px;
+            background: linear-gradient(to right, #111, #999, #111);
+            border-radius: 4px;
+            z-index: 25;
+            box-shadow: 4px 6px 12px rgba(0,0,0,0.7);
+            left: calc(50% + 92px);
+            top: calc(50% + 78px);
+            transform: translate(-50%, -50%) rotate(-40deg);
+        }
+        .center-label-wrapper {
+            width: 114px;
+            height: 114px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .number-card {
+            width: 94px;
+            height: 94px;
+            background: #e8e4d8;
+            border-radius: 50%;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .card-line {
+            width: 80%;
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+            margin: 5px 0;
+        }
+        .card-text {
+            font-size: 10px;
+            color: #666;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .glass-shine {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 100%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="phone-case">
+    <div id="display-window"></div>
+    
+    <div class="dial-container">
+        <div id="number-plate"></div>
+        
+        <div id="rotary-disk-group">
+            <svg viewBox="0 0 320 320" style="width: 100%; height: 100%;">
+                <defs>
+                    <mask id="hole-mask">
+                        <rect x="0" y="0" width="320" height="320" fill="white" />
+                        <circle cx="160" cy="160" r="57" fill="black" />
+                        <g id="holes-group"></g>
+                    </mask>
+                </defs>
+                <circle cx="160" cy="160" r="160" fill="#1a1a1a" mask="url(#hole-mask)" />
+                <g id="rims-layer" mask="url(#hole-mask)">
+                    <circle cx="160" cy="160" r="159.5" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                </g>
+                
+                <foreignObject x="103" y="103" width="114" height="114">
+                    <div xmlns="http://www.w3.org/1999/xhtml" class="center-label-wrapper">
+                        <div class="number-card">
+                            <div class="card-text">TEL</div>
+                            <div class="card-line"></div>
+                            <div class="card-text" style="font-size: 13px; color: #333;">(03) - 1234</div>
+                            <div class="card-line"></div>
+                        </div>
+                        <div class="glass-shine"></div>
+                    </div>
+                </foreignObject>
+                <circle cx="160" cy="160" r="57" fill="none" stroke="#111" stroke-width="3" />
+            </svg>
+        </div>
+        
+        <div id="stopper"></div>
+    </div>
+    
+    <button onclick="resetDisplay()" class="mt-20 text-zinc-700 text-[10px] border border-zinc-900 px-6 py-2 rounded-full hover:bg-zinc-950 transition-all uppercase font-black tracking-widest">Reset</button>
+</div>
+
+<script>
+    const diskGroup = document.getElementById('rotary-disk-group');
+    const plate = document.getElementById('number-plate');
+    const holesGroup = document.getElementById('holes-group');
+    const rimsLayer = document.getElementById('rims-layer');
+    const display = document.getElementById('display-window');
+
+    const CENTER_COORD = 160; 
+    const HOLE_RADIUS = 112; 
+    const HOLE_SIZE = 26;    
+    const START_ANGLE = -30; 
+    const STEP = -30;        
+    const STOP_ANGLE = 18;   
+
+    let currentRotation = 0;
+    let isDragging = false;
+    let activeHoleIdx = -1;
+    let isReturning = false;
+    let lastMouseAngle = 0;
+    let totalDelta = 0;
+
+    let audioCtx = null;
+    function playTick() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.04);
+        g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.04);
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+    }
+
+    function init() {
+        const labels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+        labels.forEach((num, i) => {
+            const angleDeg = START_ANGLE + (i * STEP);
+            const rad = angleDeg * (Math.PI / 180);
+            const x = CENTER_COORD + HOLE_RADIUS * Math.cos(rad);
+            const y = CENTER_COORD + HOLE_RADIUS * Math.sin(rad);
+
+            const l = document.createElement('div');
+            l.className = 'number-label';
+            l.innerText = num;
+            l.style.left = `${x}px`;
+            l.style.top = `${y}px`;
+            plate.appendChild(l);
+
+            const hole = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            hole.setAttribute("cx", x);
+            hole.setAttribute("cy", y);
+            hole.setAttribute("r", HOLE_SIZE);
+            hole.setAttribute("fill", "black");
+            holesGroup.appendChild(hole);
+
+            const rimHighlight = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            rimHighlight.setAttribute("cx", x);
+            rimHighlight.setAttribute("cy", y);
+            rimHighlight.setAttribute("r", HOLE_SIZE + 0.5);
+            rimHighlight.setAttribute("fill", "none");
+            rimHighlight.setAttribute("stroke", "rgba(255,255,255,0.12)");
+            rimHighlight.setAttribute("stroke-width", "0.8");
+            rimsLayer.appendChild(rimHighlight);
+        });
+        updateVisuals();
+    }
+
+    function updateVisuals() {
+        diskGroup.style.transform = `rotate(${currentRotation}deg)`;
+    }
+
+    function getAngle(e) {
+        const rect = diskGroup.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const ex = (e.touches ? e.touches[0].clientX : e.clientX);
+        const ey = (e.touches ? e.touches[0].clientY : e.clientY);
+        return Math.atan2(ey - cy, ex - cx) * 180 / Math.PI;
+    }
+
+    function handleStart(e) {
+        if (isReturning) return;
+        const touchAngle = getAngle(e);
+        activeHoleIdx = -1;
+        for (let i = 0; i < 10; i++) {
+            const holePos = START_ANGLE + (i * STEP) + currentRotation;
+            let diff = touchAngle - holePos;
+            while (diff > 180) diff -= 360;
+            while (diff < -180) diff += 360;
+            if (Math.abs(diff) < 22) {
+                activeHoleIdx = i;
+                lastMouseAngle = touchAngle;
+                totalDelta = 0;
+                isDragging = true;
+                break;
+            }
+        }
+    }
+
+    function handleMove(e) {
+        if (!isDragging || isReturning) return;
+        const moveAngle = getAngle(e);
+        let delta = moveAngle - lastMouseAngle;
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+        totalDelta += delta;
+        lastMouseAngle = moveAngle;
+        if (totalDelta > 0) {
+            const holeStart = START_ANGLE + (activeHoleIdx * STEP);
+            const maxRot = STOP_ANGLE - holeStart;
+            currentRotation = Math.min(totalDelta, maxRot);
+            updateVisuals();
+        } else {
+            currentRotation = 0;
+            updateVisuals();
+        }
+    }
+
+    function handleEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        const holeStart = START_ANGLE + (activeHoleIdx * STEP);
+        const maxRot = STOP_ANGLE - holeStart;
+        const success = (maxRot - currentRotation < 10);
+        startReturnProcess(success ? activeHoleIdx + 1 : -1);
+    }
+
+    function startReturnProcess(digit) {
+        isReturning = true;
+        const startRot = currentRotation;
+        const startTime = performance.now();
+        const duration = Math.max(150, startRot * 3.5); 
+        let lastTickStep = 0;
+        function animate(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            currentRotation = startRot * (1 - progress);
+            updateVisuals();
+            if (digit !== -1) {
+                const currentTick = Math.floor((startRot - currentRotation) / 30);
+                if (currentTick > lastTickStep) {
+                    playTick();
+                    lastTickStep = currentTick;
+                }
+            }
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                isReturning = false;
+                if (digit !== -1) {
+                    display.innerText += (digit === 10 ? 0 : digit);
+                    playTick(); 
+                }
+                currentRotation = 0;
+                updateVisuals();
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function resetDisplay() { display.innerText = ""; }
+
+    diskGroup.addEventListener('mousedown', handleStart);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    diskGroup.addEventListener('touchstart', handleStart);
+    window.addEventListener('touchmove', handleMove);
+    window.addEventListener('touchend', handleEnd);
+
+    init();
+</script>
+
+</body>
+</html>
